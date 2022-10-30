@@ -1,23 +1,45 @@
 //variáveis da bolinha
 let xBolinha = 300;
 let yBolinha = 200;
-let diametro = 50;
+let diametro = 13;
 let raio = diametro / 2 ;
 
 //velocidade da bolinha
 let velocidadeXBolinha = 6;
 let velocidadeYBolinha = 6;
-
-//variaveis da raquete
-let xRaquete = 5;
-let yRaquete = 150;
 let raqueteComprimento = 10;
 let raqueteAltura = 90;
 
+//variáveis da raquete
+let xRaquete = 5;
+let yRaquete = 150;
+
+//variáveis do oponente
+let xRaqueteOponente = 585;
+let yRaqueteOponente = 150;
+let velocidadeYOponente;
+
 let colidiu = false;
+let chanceDeErrar = 0;
+
+//placar do jogo
+let meusPontos = 0;
+let pontosDoOponente = 0;
+
+//sons do jogo
+let ponto;
+let raquetada;
+let trilha;
+
+function preload(){
+  trilha = loadSound("trilha.mp3");
+  raquetada = loadSound("raquetada.mp3");
+  ponto = loadSound("ponto.mp3");
+}
 
 function setup() {
   createCanvas(600, 400);
+  trilha.loop();
 }
 
 function draw() {
@@ -25,10 +47,15 @@ function draw() {
   mostraBolinha();
   movimentaBolinha();
   verificaColisaoBorda();
-  mostraRaquete();
-  movimentaRaquete();
-  verificaColisaoRaquete();
-  //colisaoMinhaRaqueteBiblioteca();
+  mostraRaquete(xRaquete, yRaquete);
+  movimentaMinhaRaquete();
+  //verificaColisaoRaquete();
+  verificaColisaoRaquete(xRaquete, yRaquete);
+  mostraRaquete(xRaqueteOponente, yRaqueteOponente);
+  movimentaRaqueteOponente();
+  verificaColisaoRaquete(xRaqueteOponente, yRaqueteOponente);
+  incluiPlacar();
+  marcaPonto();
 }
 
 function mostraBolinha(){
@@ -51,11 +78,12 @@ function verificaColisaoBorda(){
   }
 }
 
-function mostraRaquete() {
-  rect(xRaquete, yRaquete, raqueteComprimento, raqueteAltura)
+function mostraRaquete(x,y){
+  rect(x, y, raqueteComprimento, 
+      raqueteAltura);
 }
 
-function movimentaRaquete() {
+function movimentaMinhaRaquete(){
   if (keyIsDown(UP_ARROW)){
     yRaquete -= 10;
   }
@@ -65,25 +93,77 @@ function movimentaRaquete() {
 }
 
 function verificaColisaoRaquete(){
-  if (xBolinha - raio < xRaquete + raqueteComprimento 
-    && yBolinha - raio < yRaquete + raqueteAltura 
-    && yBolinha + raio > yRaquete) {
+  if (xBolinha - raio < xRaquete + raqueteComprimento && yBolinha - raio < yRaquete + raqueteAltura && yBolinha + raio > yRaquete){
     velocidadeXBolinha *= -1;
   }
 }
 
-function colisaoMinhaRaqueteBiblioteca() {
-  colidiu = collideRectCircle(xRaquete, yRaquete, raqueteComprimento, raqueteAltura, xBolinha, yBolinha, raio);
-  if (colidiu) {
+function verificaColisaoRaquete(x, y){
+  colidiu = collideRectCircle(x, y,raqueteComprimento,raqueteAltura,
+xBolinha,yBolinha,raio);
+  if (colidiu){
     velocidadeXBolinha *= -1;
+    raquetada.play();
   }
-  
+}
+
+function movimentaRaqueteOponente() {
+  velocidadeYOponente = yBolinha -yRaqueteOponente - raqueteComprimento / 2 - 30;
+  yRaqueteOponente += velocidadeYOponente + chanceDeErrar
+  calculaChanceDeErrar()
+}
+
+function calculaChanceDeErrar() {
+  if (pontosDoOponente >= meusPontos) {
+    chanceDeErrar += 1
+    if (chanceDeErrar >= 39){
+      chanceDeErrar = 40
+    }
+  } else {
+    chanceDeErrar -= 1
+    if (chanceDeErrar <= 35){
+      chanceDeErrar = 35
+    }
+  }
 }
 
 
-//Criamos uma função para desenhar a raquete
+function bolinhaNaoFicaPresa(){
+    if (XBolinha - raio < 0){
+    XBolinha = 23
+    }
+}
 
-//Movimentamos a raquete através das setas para cima e para baixo do teclado, através dos códigos keyIsDown(UP_ARROW) e keyIsDown(DOWN_ARROW) respectivamente
 
-//Implementamos a colisão da bolinha com a minha raquete, verificando a posição x e y de cada um deles
+function incluiPlacar(){
+  stroke(255);
+  textAlign(CENTER);
+  textSize(16);
+  fill(color(255, 140, 0));
+  rect(150, 10, 40, 20);
+  fill(255);
+  text(meusPontos, 170, 26);
+  fill(color(255, 140, 0));
+  rect(450, 10, 40, 20);
+  fill(255);
+  text(pontosDoOponente, 470, 26);
+}
+
+function marcaPonto(){
+  if (xBolinha > 590){
+    meusPontos += 1;
+    ponto.play();
+  }
+  if (xBolinha < 10){
+    pontosDoOponente += 1;
+    ponto.play();
+  }
+}
+
+//Criamos o placar do jogo, marcando os meus pontos e os pontos do oponente
+
+//Editamos o placar do jogo, alterando seu tamanho, criando uma caixa inspirada na exibição do placar do Scratch
+
+//Incluímos sons no jogo, para melhorar a ambientação da pessoa que vai jogar
+
 
